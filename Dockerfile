@@ -6,7 +6,19 @@ ENV NGINX_VERSION 1.9.4
 ENV UPSTREAM_CHECK_MODULE_VERSION 0.3.0
 
 RUN apt-get -qq update && \
-  apt-get -y -qq install wget patch build-essential zlib1g-dev libpcre3 libpcre3-dev libbz2-dev libssl-dev tar unzip && \
+  apt-get install -y --no-install-recommends \
+    ca-certificates \
+    gcc \
+    make \
+    wget \
+    patch \
+    zlib1g-dev \
+    libpcre3 \
+    libpcre3-dev \
+    libbz2-dev \
+    libssl-dev \
+    tar \
+    unzip && \
   cd /tmp && \
   wget -q https://github.com/yaoweibin/nginx_upstream_check_module/archive/v$UPSTREAM_CHECK_MODULE_VERSION.tar.gz && \
   tar xvf v$UPSTREAM_CHECK_MODULE_VERSION.tar.gz && \
@@ -21,10 +33,14 @@ RUN apt-get -qq update && \
     --sbin-path=/usr/local/sbin \
     --pid-path=/var/run/nginx.pid \
     --http-log-path=/var/log/nginx/access.log \
-    --error-log-path=/var/log/nginx/error.log && \
+    --error-log-path=/var/log/nginx/error.log \
+    --with-http_ssl_module --with-ipv6 && \
   make && \
   make install && \
-  rm -rf /tmp/nginx* && \
+  apt-get clean && \
+  apt-get autoclean && \
+  apt-get autoremove && \
+  rm -rf /tmp/*/ /var/lib/apt/lists/* && \
   ln -sf /dev/stdout /var/log/nginx/access.log && \
   ln -sf /dev/stderr /var/log/nginx/error.log
 
